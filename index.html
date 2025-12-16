@@ -2,11 +2,13 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Mapa Interactivo POSADA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Mapa POSADA - Navegación Segura</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* RESET Y CONFIGURACIONES BASE */
+        /* RESET COMPLETO */
         * {
             margin: 0;
             padding: 0;
@@ -14,354 +16,261 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        html {
-            font-size: 16px;
+        html, body {
+            width: 100%;
             height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
-            padding: 0;
-            background: linear-gradient(135deg, #E6F3FF 0%, #F0E6FF 100%);
-            transition: background 1.5s ease;
-            overflow-x: hidden;
             display: flex;
             flex-direction: column;
+            background: #f0f4f8;
+            transition: background-color 1s ease;
         }
         
-        /* CONTENEDOR PRINCIPAL */
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* HEADER - Adaptable */
-        .header {
-            background: linear-gradient(135deg, #4a6fa5 0%, #2c3e50 100%);
+        /* HEADER MINIMALISTA */
+        .app-header {
+            background: linear-gradient(135deg, #2c5282 0%, #1a365d 100%);
             color: white;
-            padding: 20px 15px;
+            padding: 15px 20px;
             text-align: center;
-            position: sticky;
-            top: 0;
+            flex-shrink: 0;
             z-index: 100;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         
-        .header h1 {
-            font-size: clamp(1.5rem, 5vw, 2.2rem);
-            margin-bottom: 8px;
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            flex-wrap: wrap;
         }
         
-        .header p {
-            font-size: clamp(0.9rem, 3vw, 1.1rem);
+        .app-subtitle {
+            font-size: 0.9rem;
             opacity: 0.9;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.4;
+            margin-top: 5px;
+            font-weight: 400;
         }
         
-        /* CONTENIDO PRINCIPAL - Diseño adaptable */
-        .main-content {
+        /* CONTENEDOR PRINCIPAL - MAPA GRANDE */
+        .main-container {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            flex: 1;
-            padding: 15px;
-            gap: 15px;
-        }
-        
-        /* SECCIÓN DEL MAPA */
-        .map-section {
-            flex: 1;
-            background-color: white;
-            border-radius: 20px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            min-height: 400px;
         }
         
-        .map-wrapper {
+        /* CONTENEDOR DEL MAPA (80% de la pantalla) */
+        .map-container {
             flex: 1;
             position: relative;
-            min-height: 300px;
+            background: white;
+            border-radius: 0;
+            overflow: hidden;
+            min-height: 70vh;
+            margin: 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
         }
         
         .map-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
             position: absolute;
             top: 0;
             left: 0;
-        }
-        
-        /* CONTROLES - Optimizados para touch */
-        .controls {
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-top: 2px solid #e9ecef;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .color-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .color-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background-color: white;
-            padding: 10px 18px;
-            border-radius: 50px;
-            border: 2px solid #e9ecef;
-            min-width: 200px;
-            justify-content: center;
-        }
-        
-        .current-color {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 0.95rem;
-        }
-        
-        .color-sample {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 0 5px rgba(0,0,0,0.2);
-            flex-shrink: 0;
-        }
-        
-        /* BOTONES - Tamaños optimizados para touch */
-        .btn {
-            background: linear-gradient(135deg, #4a6fa5 0%, #3a5a8c 100%);
-            color: white;
-            border: none;
-            padding: 14px 24px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 12px rgba(74, 111, 165, 0.3);
-            min-height: 48px; /* Altura mínima para touch */
-            min-width: 48px; /* Ancho mínimo para touch */
-            touch-action: manipulation;
-        }
-        
-        .btn:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(74, 111, 165, 0.4);
-        }
-        
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        
-        .btn-small {
-            padding: 12px 20px;
-            font-size: 0.95rem;
-        }
-        
-        .btn-icon {
-            width: 48px;
-            height: 48px;
-            padding: 0;
-            justify-content: center;
-        }
-        
-        /* CONTADOR DE USUARIOS */
-        .user-count {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 1rem;
-            color: #4a6fa5;
-            font-weight: 600;
-            padding: 10px;
-            background-color: white;
-            border-radius: 50px;
-            border: 2px solid #e9ecef;
-        }
-        
-        /* SIDEBAR / PANEL LATERAL */
-        .sidebar {
-            background-color: white;
-            border-radius: 20px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .share-box {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid #e9ecef;
-        }
-        
-        .share-box h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.2rem;
-        }
-        
-        .share-url {
-            font-family: 'Courier New', monospace;
-            background-color: white;
-            padding: 15px;
-            border-radius: 10px;
-            word-break: break-all;
-            margin: 15px 0;
-            border: 2px dashed #adb5bd;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            -webkit-user-select: all;
-            user-select: all;
-        }
-        
-        .share-url:active {
-            background-color: #e9ecef;
-            border-color: #4a6fa5;
-        }
-        
-        .copy-btn {
             width: 100%;
-            justify-content: center;
+            height: 100%;
+            border: none;
+            background: #f8f9fa;
         }
         
-        /* PALETA DE COLORES */
-        .colors-title {
-            color: #2c3e50;
+        /* PANEL INFERIOR DESLIZABLE */
+        .control-panel {
+            background: white;
+            border-radius: 25px 25px 0 0;
+            padding: 25px 20px 30px;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            z-index: 50;
+            flex-shrink: 0;
+            max-height: 40vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* INDICADOR DE DESLIZAMIENTO */
+        .drag-handle {
+            width: 40px;
+            height: 5px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            margin: 0 auto 20px auto;
+        }
+        
+        /* SECCIONES DEL PANEL */
+        .panel-section {
+            margin-bottom: 25px;
+        }
+        
+        .section-title {
+            color: #2d3748;
+            font-size: 1.1rem;
+            font-weight: 600;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.2rem;
         }
         
-        .color-palette {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
-            gap: 10px;
+        /* CONTROL DE COLOR */
+        .color-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
             margin-bottom: 20px;
         }
         
-        .color-option {
-            width: 45px;
-            height: 45px;
+        .color-display {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .current-color-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+        
+        .color-preview {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            cursor: pointer;
             border: 3px solid white;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+        
+        /* BOTONES GRANDES PARA PERSONAS MAYORES */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            border: none;
+            padding: 18px 10px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 85px;
             touch-action: manipulation;
         }
         
-        .color-option:active {
+        .action-btn:active {
+            transform: scale(0.97);
+            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+        }
+        
+        .action-btn i {
+            font-size: 1.4rem;
+        }
+        
+        .btn-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        /* PALETA DE COLORES VISIBLE */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .palette-color {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin: 0 auto;
+        }
+        
+        .palette-color:active {
             transform: scale(1.1);
         }
         
-        .color-option.selected {
-            border-color: #4a6fa5;
-            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.3), 0 5px 15px rgba(0,0,0,0.2);
+        .palette-color.selected {
+            border-color: #4299e1;
+            box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.3);
         }
         
-        /* PANEL INFORMATIVO */
-        .info-panel {
-            padding: 18px;
-            background-color: #e8f4ff;
-            border-radius: 12px;
-            border-left: 4px solid #4a6fa5;
+        /* INFORMACIÓN DE ACCESIBILIDAD */
+        .accessibility-info {
+            background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #38b2ac;
+            margin-top: 20px;
         }
         
-        .info-panel h4 {
-            color: #2c3e50;
+        .accessibility-title {
+            color: #234e52;
+            font-weight: 600;
             margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         
-        .info-panel p {
-            font-size: 0.9rem;
-            color: #495057;
+        .accessibility-text {
+            color: #285e61;
+            font-size: 0.95rem;
             line-height: 1.5;
         }
         
-        /* FOOTER */
-        .footer {
-            text-align: center;
-            padding: 20px 15px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-top: auto;
-        }
-        
-        .footer p {
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-        
-        /* NOTIFICACIONES - Adaptables */
+        /* NOTIFICACIONES */
         .notification {
             position: fixed;
-            bottom: 20px;
+            top: 80px;
             left: 20px;
             right: 20px;
-            padding: 16px 20px;
-            background: linear-gradient(135deg, #4a6fa5 0%, #3a5a8c 100%);
+            background: rgba(45, 55, 72, 0.95);
             color: white;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            padding: 18px 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(-20px);
             transition: all 0.3s ease;
             z-index: 1000;
-            font-weight: 500;
             text-align: center;
-            max-width: 500px;
-            margin: 0 auto;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
         
         .notification.show {
@@ -369,112 +278,122 @@
             transform: translateY(0);
         }
         
-        /* MENÚ MÓVIL (Opcional para pantallas muy pequeñas) */
-        .mobile-menu {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: white;
-            padding: 10px 15px;
-            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1);
-            z-index: 99;
-        }
-        
-        .mobile-menu-buttons {
+        /* ESTADOS ACTIVOS */
+        .active-session {
             display: flex;
-            justify-content: space-around;
-        }
-        
-        .mobile-menu-btn {
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 5px;
-            background: none;
-            border: none;
-            color: #4a6fa5;
-            font-size: 0.8rem;
-            padding: 8px;
-            cursor: pointer;
+            justify-content: center;
+            gap: 10px;
+            background: #edf2f7;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            color: #4a5568;
+            margin-top: 15px;
         }
         
-        /* MEDIA QUERIES PARA DIFERENTES DISPOSITIVOS */
+        /* MEDIA QUERIES ESPECÍFICAS PARA IPHONE 13 */
         
-        /* Tabletas (768px en adelante) */
-        @media (min-width: 768px) {
-            .main-content {
-                padding: 20px;
-                gap: 20px;
+        /* iPhone 13 (390x844) - Portrait */
+        @media only screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) {
+            .map-container {
+                min-height: 75vh;
+            }
+            
+            .action-btn {
+                min-height: 90px;
+                padding: 20px 10px;
+            }
+            
+            .palette-color {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        
+        /* iPhone 13 Pro Max (428x926) */
+        @media only screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) {
+            .map-container {
+                min-height: 78vh;
+            }
+            
+            .control-panel {
+                padding: 30px 25px 35px;
+            }
+        }
+        
+        /* ORIENTACIÓN HORIZONTAL */
+        @media (orientation: landscape) {
+            body {
                 flex-direction: row;
             }
             
-            .map-section {
-                flex: 2;
+            .app-header {
+                writing-mode: vertical-rl;
+                transform: rotate(180deg);
+                padding: 20px 15px;
+                width: 60px;
             }
             
-            .sidebar {
+            .app-title {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .main-container {
+                flex-direction: row;
+            }
+            
+            .map-container {
+                min-height: 100vh;
+                flex: 3;
+            }
+            
+            .control-panel {
                 flex: 1;
-                min-width: 300px;
-                max-width: 400px;
+                max-height: 100vh;
+                border-radius: 0;
+                box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
+                overflow-y: auto;
             }
             
-            .controls {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-            
-            .color-controls {
-                justify-content: flex-start;
-            }
-            
-            .btn-group {
-                justify-content: flex-start;
-            }
-            
-            .notification {
-                left: auto;
-                right: 20px;
-                max-width: 350px;
+            .action-buttons {
+                grid-template-columns: 1fr;
             }
             
             .color-palette {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* PANTALLAS GRANDES (TABLETS Y DESKTOP) */
+        @media (min-width: 768px) {
+            body {
+                max-width: 768px;
+                margin: 0 auto;
+                border-left: 1px solid #e2e8f0;
+                border-right: 1px solid #e2e8f0;
+                box-shadow: 0 0 40px rgba(0,0,0,0.1);
+            }
+            
+            .app-header {
+                padding: 20px;
+            }
+            
+            .app-title {
+                font-size: 1.8rem;
+            }
+            
+            .map-container {
+                border-radius: 0;
+            }
+            
+            .control-panel {
+                padding: 30px 40px;
+            }
+            
+            .action-buttons {
                 grid-template-columns: repeat(4, 1fr);
-            }
-        }
-        
-        /* Escritorio (1024px en adelante) */
-        @media (min-width: 1024px) {
-            .header {
-                padding: 25px 20px;
-            }
-            
-            .main-content {
-                padding: 25px;
-                gap: 25px;
-            }
-            
-            .map-section {
-                border-radius: 25px;
-            }
-            
-            .sidebar {
-                padding: 25px;
-                border-radius: 25px;
-            }
-            
-            .color-palette {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 12px;
-            }
-        }
-        
-        /* Pantallas grandes (1200px en adelante) */
-        @media (min-width: 1200px) {
-            .header h1 {
-                font-size: 2.5rem;
             }
             
             .color-palette {
@@ -482,558 +401,490 @@
             }
         }
         
-        /* Pantallas muy pequeñas (menos de 400px) */
-        @media (max-width: 400px) {
-            .header {
-                padding: 15px 10px;
-            }
-            
-            .main-content {
-                padding: 10px;
-                gap: 10px;
-            }
-            
-            .map-section, .sidebar {
-                border-radius: 15px;
-            }
-            
-            .color-info {
-                min-width: auto;
-                padding: 8px 15px;
-            }
-            
-            .btn {
-                padding: 12px 20px;
-                font-size: 0.95rem;
-            }
-            
-            .color-palette {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 8px;
-            }
-            
-            .mobile-menu {
-                display: block;
-            }
-            
-            /* Ajustar cuando el teclado está abierto en móviles */
-            @media (max-height: 500px) {
-                .header {
-                    position: relative;
-                }
-                
-                .map-wrapper {
-                    min-height: 250px;
-                }
-            }
+        /* MODOS DE ACCESIBILIDAD */
+        .high-contrast .action-btn {
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            color: white;
+            border: 3px solid white;
         }
         
-        /* Orientación horizontal en móviles */
-        @media (max-height: 600px) and (orientation: landscape) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .header p {
-                display: none;
-            }
-            
-            .map-wrapper {
-                min-height: 250px;
-            }
-            
-            .controls {
-                padding: 10px;
-                flex-wrap: nowrap;
-            }
+        .high-contrast .color-palette .palette-color {
+            border: 3px solid #000;
         }
         
-        /* Modo oscuro del sistema */
-        @media (prefers-color-scheme: dark) {
-            .map-section, .sidebar, .share-box, .color-info, .user-count {
-                background-color: #2d3748;
-                border-color: #4a5568;
-                color: #e2e8f0;
-            }
-            
-            .header {
-                background: linear-gradient(135deg, #2c5282 0%, #1a202c 100%);
-            }
-            
-            .share-url, .info-panel {
-                background-color: #4a5568;
-                color: #e2e8f0;
-            }
-            
-            .current-color, .colors-title, .share-box h3 {
-                color: #e2e8f0;
-            }
-            
-            .footer {
-                background-color: #2d3748;
-                color: #a0aec0;
-            }
+        .large-text {
+            font-size: 1.2rem;
         }
         
-        /* Mejoras para Safari iOS */
+        .large-text .action-btn {
+            font-size: 1.3rem;
+            min-height: 100px;
+        }
+        
+        /* ANIMACIONES SUAVES */
+        .map-frame {
+            transition: opacity 0.5s ease;
+        }
+        
+        .palette-color {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        /* MEJORAS PARA SAFARI iOS */
         @supports (-webkit-touch-callout: none) {
             body {
                 min-height: -webkit-fill-available;
             }
             
-            .btn, .color-option {
-                -webkit-touch-callout: none;
+            .map-container {
+                min-height: -webkit-fill-available;
+            }
+            
+            .control-panel {
+                padding-bottom: max(30px, env(safe-area-inset-bottom));
             }
         }
         
-        /* Prevenir zoom en inputs en iOS */
-        @media screen and (max-width: 768px) {
-            input, select, textarea {
-                font-size: 16px !important;
-            }
+        /* PREVENIR SELECT TEXT */
+        .no-select {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* SCROLL SUAVE */
+        .control-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .control-panel::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .control-panel::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 10px;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <!-- HEADER -->
-        <header class="header">
-            <h1>
-                <i class="fas fa-map-marked-alt"></i>
-                Mapa POSADA
-            </h1>
-            <p>Comparte este enlace</p>
-        </header>
+<body class="no-select">
+    <!-- CABECERA MINIMALISTA -->
+    <header class="app-header">
+        <div class="app-title">
+            <i class="fas fa-map-marker-alt"></i>
+            POSADA
+        </div>
+        <div class="app-subtitle">Navegación Asistida</div>
+    </header>
+    
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="main-container">
+        <!-- MAPA GRANDE (80% PANTALLA) -->
+        <div class="map-container">
+            <iframe 
+                src="https://www.google.com/maps/d/u/0/embed?mid=1bcJ_sOb0WPlQEJCom5hkQFPqkfS8mO8&ehbc=2E312F" 
+                class="map-frame"
+                title="Mapa de Navegación POSADA"
+                allowfullscreen
+                loading="eager">
+            </iframe>
+        </div>
         
-        <!-- CONTENIDO PRINCIPAL -->
-        <main class="main-content">
-            <!-- SECCIÓN DEL MAPA -->
-            <section class="map-section">
-                <div class="map-wrapper">
-                    <iframe 
-                        src="https://www.google.com/maps/d/u/0/embed?mid=1bcJ_sOb0WPlQEJCom5hkQFPqkfS8mO8&ehbc=2E312F" 
-                        class="map-frame"
-                        title="Mapa de POSADA"
-                        allowfullscreen
-                        loading="lazy">
-                    </iframe>
-                </div>
-                
-                <!-- CONTROLES -->
-                <div class="controls">
-                    <div class="color-controls">
-                        <div class="color-info">
-                            <div class="current-color">
-                                <i class="fas fa-palette"></i>
-                                <span id="color-name">Color personal</span>
-                                <div id="color-sample" class="color-sample"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="btn-group">
-                            <button class="btn" id="change-color-btn">
-                                <i class="fas fa-random"></i>
-                                <span class="btn-text">Cambiar</span>
-                            </button>
-                            <button class="btn btn-icon" id="refresh-btn" title="Actualizar mapa">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="user-count">
-                        <i class="fas fa-users"></i>
-                        <span id="user-count">1</span> en línea
-                    </div>
-                </div>
-            </section>
+        <!-- PANEL DE CONTROL INFERIOR -->
+        <div class="control-panel">
+            <div class="drag-handle"></div>
             
-            <!-- SIDEBAR / PANEL LATERAL -->
-            <aside class="sidebar">
-                <!-- COMPARTIR ENLACE -->
-                <div class="share-box">
-                    <h3><i class="fas fa-share-alt"></i> Compartir</h3>
-                    <p>Envía este enlace a otras personas:</p>
-                    
-                    <div class="share-url" id="share-url">
-                        Cargando...
+            <!-- CONTROL DE COLOR PERSONAL -->
+            <div class="panel-section">
+                <h3 class="section-title">
+                    <i class="fas fa-palette"></i>
+                    Color de Fondo Personal
+                </h3>
+                <div class="color-control">
+                    <div class="color-display">
+                        <div class="color-preview" id="color-preview"></div>
+                        <span class="current-color-name" id="current-color-name">Color personal</span>
                     </div>
-                    
-                    <button class="btn copy-btn" id="copy-btn">
-                        <i class="far fa-copy"></i> Copiar Enlace
+                    <button class="action-btn" id="change-color-btn" style="min-height: auto; padding: 12px 20px;">
+                        <i class="fas fa-random"></i>
+                        <span class="btn-label">Cambiar</span>
                     </button>
                 </div>
-                
-                <!-- PALETA DE COLORES -->
-                <div>
-                    <h3 class="colors-title"><i class="fas fa-paint-brush"></i> Colores</h3>
-                    <p>Escoge el que quieras:</p>
-                    
-                    <div class="color-palette" id="color-palette">
-                        <!-- Los colores se generarán automáticamente -->
-                    </div>
+            </div>
+            
+            <!-- ACCIONES PRINCIPALES -->
+            <div class="panel-section">
+                <h3 class="section-title">
+                    <i class="fas fa-tools"></i>
+                    Acciones Rápidas
+                </h3>
+                <div class="action-buttons">
+                    <button class="action-btn" id="refresh-map-btn">
+                        <i class="fas fa-sync-alt"></i>
+                        <span class="btn-label">Actualizar Mapa</span>
+                    </button>
+                    <button class="action-btn" id="share-link-btn">
+                        <i class="fas fa-share-alt"></i>
+                        <span class="btn-label">Compartir</span>
+                    </button>
+                    <button class="action-btn" id="zoom-in-btn">
+                        <i class="fas fa-search-plus"></i>
+                        <span class="btn-label">Acercar</span>
+                    </button>
                 </div>
-                
-                <!-- INFORMACIÓN -->
-                <div class="info-panel">
-                    <h4><i class="fas fa-info-circle"></i> ¿Cómo funciona?</h4>
-                    <p>
-                        1. Utiliza el mapa para interactuar<br>
-                        2. Selecciona en la barra de la izquierda las ubicaciones<br>
-                        3. El mapa se actualiza automáticamente cada 2 minutos<br>
-                        4. Puedes pedir las direcciones a cualquier punto marcado en el mapa<br>
+            </div>
+            
+            <!-- PALETA DE COLORES -->
+            <div class="panel-section">
+                <h3 class="section-title">
+                    <i class="fas fa-paint-brush"></i>
+                    Seleccionar Color
+                </h3>
+                <p style="color: #4a5568; margin-bottom: 15px; font-size: 0.95rem;">
+                <div class="color-palette" id="color-palette">
+                    <!-- Colores generados por JavaScript -->
                 </div>
-            </aside>
-        </main>
-        
-        <!-- FOOTER -->
-        <footer class="footer">
-            <p><i class="fas fa-heart"></i> Diseñado pensando en la accesibilidad</p>
-        </footer>
-    </div>
+            </div>
+            
+            <!-- INFORMACIÓN DE ACCESIBILIDAD -->
+            <div class="accessibility-info">
+                <h4 class="accessibility-title">
+                    <i class="fas fa-universal-access"></i>
+                    ¿Cómo funciona?
+                </h4>
+                <p class="accessibility-text">
+                    1. Utiliza el mapa con dos dedos para acercar o alejar<br>
+                    2. Presiona el icono al lado de la foto de perfil para ver las ubicaciones<br>
+                    3. Selecciona a que direccion quieres ir y te llevará allá<br>
+            </div>
+            
+            <!-- SESIÓN ACTIVA -->
+            <div class="active-session">
+                <i class="fas fa-user-circle"></i>
+                Sesión personal activa
+            </div>
+        </div>
+    </main>
     
     <!-- NOTIFICACIONES -->
     <div class="notification" id="notification"></div>
     
-    <!-- MENÚ MÓVIL (solo en pantallas muy pequeñas) -->
-    <nav class="mobile-menu">
-        <div class="mobile-menu-buttons">
-            <button class="mobile-menu-btn" id="mobile-change-color">
-                <i class="fas fa-palette"></i>
-                <span>Color</span>
-            </button>
-            <button class="mobile-menu-btn" id="mobile-refresh">
-                <i class="fas fa-sync-alt"></i>
-                <span>Actualizar</span>
-            </button>
-            <button class="mobile-menu-btn" id="mobile-share">
-                <i class="fas fa-share-alt"></i>
-                <span>Compartir</span>
-            </button>
-            <button class="mobile-menu-btn" id="mobile-colors">
-                <i class="fas fa-paint-brush"></i>
-                <span>Colores</span>
-            </button>
-        </div>
-    </nav>
-    
     <script>
-        const elderFriendlyColors = [
-            { name: "Azul Claro", value: "#E6F3FF", group: "azul" },
-            { name: "Azul Pastel", value: "#D6E8FF", group: "azul" },
-            { name: "Azul Cielo", value: "#B8D4FF", group: "azul" },
-            { name: "Verde Menta", value: "#E0F2E9", group: "verde" },
-            { name: "Verde Pastel", value: "#D4EDE0", group: "verde" },
-            { name: "Verde Claro", value: "#B8E6D0", group: "verde" },
-            { name: "Beige Claro", value: "#F5F1E8", group: "beige" },
-            { name: "Marfil", value: "#F8F4E6", group: "beige" },
-            { name: "Crema", value: "#FFFBF0", group: "beige" },
-            { name: "Lavanda Claro", value: "#F0E6FF", group: "lavanda" },
-            { name: "Lila Pastel", value: "#E8E0F2", group: "lavanda" },
-            { name: "Malva Claro", value: "#E6D4FF", group: "lavanda" },
-            { name: "Gris Perla", value: "#F2F2F2", group: "gris" },
-            { name: "Gris Claro", value: "#E8E8E8", group: "gris" },
-            { name: "Gris Suave", value: "#F0F0F0", group: "gris" }
+        // PALETA DE COLORES OPTIMIZADA PARA PERSONAS MAYORES
+        const accessibilityColors = [
+            // Azules - Relajantes y de buen contraste
+            { name: "Azul Cielo Claro", value: "#E3F2FD", group: "azul", contrast: "alto" },
+            { name: "Azul Suave", value: "#BBDEFB", group: "azul", contrast: "alto" },
+            { name: "Azul Pastel", value: "#90CAF9", group: "azul", contrast: "medio" },
+            
+            // Verdes - Descanso visual
+            { name: "Verde Menta", value: "#E8F5E9", group: "verde", contrast: "alto" },
+            { name: "Verde Pastel", value: "#C8E6C9", group: "verde", contrast: "alto" },
+            { name: "Verde Claro", value: "#A5D6A7", group: "verde", contrast: "medio" },
+            
+            // Beiges - Cálidos y naturales
+            { name: "Marfil Suave", value: "#FFF8E1", group: "beige", contrast: "alto" },
+            { name: "Beige Claro", value: "#FFECB3", group: "beige", contrast: "alto" },
+            { name: "Crema", value: "#FFE082", group: "beige", contrast: "medio" },
+            
+            // Lavandas - Relajantes
+            { name: "Lavanda", value: "#F3E5F5", group: "lavanda", contrast: "alto" },
+            { name: "Lila Suave", value: "#E1BEE7", group: "lavanda", contrast: "alto" },
+            { name: "Malva Claro", value: "#CE93D8", group: "lavanda", contrast: "medio" },
+            
+            // Grises - Neutrales
+            { name: "Gris Perla", value: "#FAFAFA", group: "gris", contrast: "alto" },
+            { name: "Gris Claro", value: "#F5F5F5", group: "gris", contrast: "alto" },
+            { name: "Gris Suave", value: "#EEEEEE", group: "gris", contrast: "medio" }
         ];
         
-        // Estado de la aplicación
+        // ESTADO DE LA APLICACIÓN
         let currentColor = null;
         let userId = null;
-        let userCount = 1;
-        let isMobile = false;
+        let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         
-        // Inicializar cuando se carga la página
+        // INICIALIZACIÓN
         document.addEventListener('DOMContentLoaded', function() {
-            detectDeviceType();
             initApp();
             setupEventListeners();
             generateColorPalette();
-            showWelcomeMessage();
+            adjustForiPhone13();
+            
+            // Mostrar mensaje de bienvenida
+            setTimeout(() => {
+                showNotification('Mapa POSADA cargado correctamente', 3000);
+            }, 1000);
         });
         
-        // Detectar tipo de dispositivo
-        function detectDeviceType() {
-            isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
-            // Ajustar interfaz según el dispositivo
-            if (isMobile) {
-                document.body.classList.add('mobile');
-                // En móviles, esconder texto de botones si la pantalla es muy pequeña
-                if (window.innerWidth < 400) {
-                    document.querySelectorAll('.btn-text').forEach(el => {
-                        el.style.display = 'none';
-                    });
-                }
-            }
-        }
-        
-        // Inicializar aplicación
+        // INICIALIZAR APLICACIÓN
         function initApp() {
-            // Generar o recuperar ID de usuario
-            userId = getOrCreateUserId();
+            // Generar ID único de usuario
+            userId = generateUserId();
             
-            // Seleccionar color para este usuario
-            selectUserColor();
+            // Asignar color personal
+            assignPersonalColor();
             
-            // Actualizar interfaz
+            // Configurar interfaz
             updateInterface();
             
             // Iniciar actualizaciones automáticas
             startAutoUpdates();
-            
-            // Ajustar altura del mapa para móviles
-            adjustMapHeight();
         }
         
-        // Obtener o crear ID de usuario
-        function getOrCreateUserId() {
-            let id = localStorage.getItem('mapa_user_id');
-            if (!id) {
-                id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('mapa_user_id', id);
+        // GENERAR ID DE USUARIO
+        function generateUserId() {
+            let storedId = localStorage.getItem('posadaUserId');
+            if (!storedId) {
+                storedId = 'usr_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('posadaUserId', storedId);
             }
-            return id;
+            return storedId;
         }
         
-        // Seleccionar color para el usuario
-        function selectUserColor() {
-            // Intentar recuperar color guardado
-            const savedColor = localStorage.getItem('mapa_user_color');
+        // ASIGNAR COLOR PERSONAL
+        function assignPersonalColor() {
+            const savedColor = localStorage.getItem('posadaUserColor');
+            
             if (savedColor) {
                 try {
-                    const color = JSON.parse(savedColor);
-                    const exists = elderFriendlyColors.find(c => c.value === color.value);
-                    if (exists) {
-                        currentColor = exists;
+                    const colorData = JSON.parse(savedColor);
+                    const colorExists = accessibilityColors.find(c => c.value === colorData.value);
+                    if (colorExists) {
+                        currentColor = colorExists;
                         return;
                     }
-                } catch (e) {
-                    // Si hay error, continuar con selección nueva
+                } catch (error) {
+                    console.log('Color guardado no válido, asignando nuevo...');
                 }
             }
             
-            // Seleccionar color basado en ID de usuario
+            // Asignar color basado en ID de usuario
             let hash = 0;
             for (let i = 0; i < userId.length; i++) {
                 hash = ((hash << 5) - hash) + userId.charCodeAt(i);
                 hash = hash & hash;
             }
             
-            const colorIndex = Math.abs(hash) % elderFriendlyColors.length;
-            currentColor = elderFriendlyColors[colorIndex];
+            const colorIndex = Math.abs(hash) % accessibilityColors.length;
+            currentColor = accessibilityColors[colorIndex];
             
-            // Guardar color seleccionado
-            localStorage.setItem('mapa_user_color', JSON.stringify(currentColor));
+            // Guardar preferencia
+            localStorage.setItem('posadaUserColor', JSON.stringify(currentColor));
         }
         
-        // Actualizar interfaz
+        // ACTUALIZAR INTERFAZ
         function updateInterface() {
             if (!currentColor) return;
             
-            // Actualizar color de fondo
-            document.body.style.background = `linear-gradient(135deg, ${currentColor.value} 0%, ${lightenColor(currentColor.value, 20)} 100%)`;
+            // Aplicar color de fondo
+            document.body.style.backgroundColor = currentColor.value;
             
-            // Actualizar nombre del color
-            document.getElementById('color-name').textContent = currentColor.name;
+            // Actualizar vista previa del color
+            const colorPreview = document.getElementById('color-preview');
+            const colorName = document.getElementById('current-color-name');
             
-            // Actualizar muestra de color
-            document.getElementById('color-sample').style.backgroundColor = currentColor.value;
+            if (colorPreview) colorPreview.style.backgroundColor = currentColor.value;
+            if (colorName) colorName.textContent = currentColor.name;
             
-            // Actualizar URL para compartir
-            const url = window.location.href.split('?')[0];
-            document.getElementById('share-url').textContent = url;
-            
-            // Actualizar selección en paleta
-            updateColorPaletteSelection();
+            // Actualizar paleta de colores
+            updatePaletteSelection();
         }
         
-        // Generar paleta de colores visual
+        // GENERAR PALETA DE COLORES
         function generateColorPalette() {
             const palette = document.getElementById('color-palette');
+            if (!palette) return;
+            
             palette.innerHTML = '';
             
-            elderFriendlyColors.forEach((color, index) => {
-                const colorDiv = document.createElement('div');
-                colorDiv.className = 'color-option';
-                colorDiv.style.backgroundColor = color.value;
-                colorDiv.title = color.name;
-                colorDiv.dataset.index = index;
+            accessibilityColors.forEach((color, index) => {
+                const colorElement = document.createElement('div');
+                colorElement.className = 'palette-color';
+                colorElement.style.backgroundColor = color.value;
+                colorElement.title = `${color.name} (Contraste ${color.contrast})`;
+                colorElement.dataset.index = index;
                 
-                // Evento táctil optimizado
-                colorDiv.addEventListener('touchstart', (e) => {
+                // Eventos táctiles optimizados
+                colorElement.addEventListener('click', () => selectColor(index));
+                colorElement.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    colorDiv.style.transform = 'scale(1.1)';
+                    colorElement.style.transform = 'scale(1.1)';
                 });
-                
-                colorDiv.addEventListener('touchend', (e) => {
+                colorElement.addEventListener('touchend', (e) => {
                     e.preventDefault();
-                    colorDiv.style.transform = '';
-                    selectColorByIndex(index);
+                    colorElement.style.transform = '';
+                    selectColor(index);
                 });
                 
-                colorDiv.addEventListener('click', () => {
-                    selectColorByIndex(index);
-                });
-                
-                palette.appendChild(colorDiv);
+                palette.appendChild(colorElement);
             });
         }
         
-        // Actualizar selección en paleta
-        function updateColorPaletteSelection() {
+        // ACTUALIZAR SELECCIÓN EN PALETA
+        function updatePaletteSelection() {
             if (!currentColor) return;
             
-            const colorIndex = elderFriendlyColors.findIndex(c => c.value === currentColor.value);
-            const colorOptions = document.querySelectorAll('.color-option');
+            const colorIndex = accessibilityColors.findIndex(c => c.value === currentColor.value);
+            const colorElements = document.querySelectorAll('.palette-color');
             
-            colorOptions.forEach(option => {
-                option.classList.remove('selected');
-                if (parseInt(option.dataset.index) === colorIndex) {
-                    option.classList.add('selected');
+            colorElements.forEach((element, index) => {
+                element.classList.remove('selected');
+                if (index === colorIndex) {
+                    element.classList.add('selected');
                 }
             });
         }
         
-        // Seleccionar color por índice
-        function selectColorByIndex(index) {
-            if (index < 0 || index >= elderFriendlyColors.length) return;
+        // SELECCIONAR COLOR
+        function selectColor(index) {
+            if (index < 0 || index >= accessibilityColors.length) return;
             
-            currentColor = elderFriendlyColors[index];
-            localStorage.setItem('mapa_user_color', JSON.stringify(currentColor));
+            currentColor = accessibilityColors[index];
+            localStorage.setItem('posadaUserColor', JSON.stringify(currentColor));
             updateInterface();
             
-            showNotification(`🎨 Color: ${currentColor.name}`, 2000);
+            // Feedback táctil en móviles
+            if (isMobile && navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+            
+            showNotification(`Color cambiado a: ${currentColor.name}`, 2000);
         }
         
-        // Configurar event listeners
+        // CONFIGURAR EVENTOS
         function setupEventListeners() {
-            // Botón cambiar color
-            document.getElementById('change-color-btn').addEventListener('click', changeColorRandomly);
+            // Botón cambiar color aleatorio
+            document.getElementById('change-color-btn').addEventListener('click', changeRandomColor);
             
             // Botón actualizar mapa
-            document.getElementById('refresh-btn').addEventListener('click', refreshMap);
+            document.getElementById('refresh-map-btn').addEventListener('click', refreshMap);
             
-            // Botón copiar enlace
-            document.getElementById('copy-btn').addEventListener('click', copyLinkToClipboard);
+            // Botón compartir
+            document.getElementById('share-link-btn').addEventListener('click', shareApplication);
             
-            // Hacer clic en el enlace para copiar
-            document.getElementById('share-url').addEventListener('click', copyLinkToClipboard);
+            // Botón acercar (zoom)
+            document.getElementById('zoom-in-btn').addEventListener('click', zoomMap);
             
-            // Botones del menú móvil
-            if (document.getElementById('mobile-change-color')) {
-                document.getElementById('mobile-change-color').addEventListener('click', changeColorRandomly);
-                document.getElementById('mobile-refresh').addEventListener('click', refreshMap);
-                document.getElementById('mobile-share').addEventListener('click', copyLinkToClipboard);
-                document.getElementById('mobile-colors').addEventListener('click', scrollToColors);
-            }
+            // Eventos táctiles para el panel
+            const controlPanel = document.querySelector('.control-panel');
+            let startY = 0;
             
-            // Eventos táctiles adicionales para móviles
-            if (isMobile) {
-                // Swipe para cambiar color (opcional)
-                let touchStartX = 0;
-                document.addEventListener('touchstart', (e) => {
-                    touchStartX = e.touches[0].clientX;
-                });
-                
-                document.addEventListener('touchend', (e) => {
-                    const touchEndX = e.changedTouches[0].clientX;
-                    const diff = touchStartX - touchEndX;
+            controlPanel.addEventListener('touchstart', (e) => {
+                startY = e.touches[0].clientY;
+            }, { passive: true });
+            
+            // Soporte para gestos de deslizamiento
+            document.addEventListener('touchmove', (e) => {
+                if (e.touches.length === 1) {
+                    const currentY = e.touches[0].clientY;
+                    const diff = startY - currentY;
                     
-                    // Si el swipe es suficientemente largo
-                    if (Math.abs(diff) > 100) {
-                        changeColorRandomly();
+                    // Deslizar hacia arriba para ocultar panel
+                    if (diff > 50 && window.innerHeight - e.touches[0].clientY < 100) {
+                        controlPanel.style.transform = 'translateY(80%)';
                     }
-                });
-                
-                // Prevenir zoom con doble toque
-                let lastTouchEnd = 0;
-                document.addEventListener('touchend', (e) => {
-                    const now = Date.now();
-                    if (now - lastTouchEnd <= 300) {
-                        e.preventDefault();
+                    // Deslizar hacia abajo para mostrar panel
+                    else if (diff < -50) {
+                        controlPanel.style.transform = 'translateY(0)';
                     }
-                    lastTouchEnd = now;
-                }, { passive: false });
-            }
-            
-            // Redimensionar ventana
-            window.addEventListener('resize', adjustMapHeight);
-            window.addEventListener('orientationchange', adjustMapHeight);
+                }
+            }, { passive: true });
         }
         
-        // Cambiar color aleatoriamente
-        function changeColorRandomly() {
-            const currentIndex = elderFriendlyColors.findIndex(c => c.value === currentColor.value);
+        // CAMBIAR COLOR ALEATORIAMENTE
+        function changeRandomColor() {
+            if (!currentColor) return;
+            
+            const currentIndex = accessibilityColors.findIndex(c => c.value === currentColor.value);
             let newIndex;
             
             do {
-                newIndex = Math.floor(Math.random() * elderFriendlyColors.length);
-            } while (newIndex === currentIndex && elderFriendlyColors.length > 1);
+                newIndex = Math.floor(Math.random() * accessibilityColors.length);
+            } while (newIndex === currentIndex && accessibilityColors.length > 1);
             
-            selectColorByIndex(newIndex);
+            selectColor(newIndex);
         }
         
-        // Actualizar mapa
+        // ACTUALIZAR MAPA
         function refreshMap() {
             const mapFrame = document.querySelector('.map-frame');
             if (mapFrame) {
-                const currentSrc = mapFrame.src;
-                mapFrame.src = currentSrc.split('&t=')[0] + '&t=' + new Date().getTime();
-                showNotification('🗺️ Mapa actualizado', 1500);
+                const originalSrc = mapFrame.src;
+                const timestamp = new Date().getTime();
                 
-                // Vibración en móviles (si está disponible)
+                // Forzar recarga del mapa
+                mapFrame.src = originalSrc.split('&t=')[0] + '&t=' + timestamp;
+                mapFrame.style.opacity = '0.7';
+                
+                setTimeout(() => {
+                    mapFrame.style.opacity = '1';
+                }, 500);
+                
+                showNotification('Mapa actualizado', 1500);
+                
+                // Feedback táctil
                 if (isMobile && navigator.vibrate) {
                     navigator.vibrate(50);
                 }
             }
         }
         
-        // Copiar enlace al portapapeles
-        function copyLinkToClipboard() {
-            const url = window.location.href.split('?')[0];
+        // COMPARTIR APLICACIÓN
+        function shareApplication() {
+            const shareUrl = window.location.href.split('?')[0];
+            const shareTitle = 'Mapa POSADA - Navegación Asistida';
+            const shareText = 'Te comparto este mapa interactivo';
             
-            // Usar API moderna o fallback
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url)
-                    .then(() => {
-                        showNotification('📋 Enlace copiado', 2000);
-                    })
-                    .catch(err => {
-                        // Fallback para navegadores antiguos
-                        copyFallback(url);
-                    });
+            // Usar Web Share API si está disponible
+            if (navigator.share) {
+                navigator.share({
+                    title: shareTitle,
+                    text: shareText,
+                    url: shareUrl
+                })
+                .then(() => showNotification('Enlace compartido', 2000))
+                .catch(err => {
+                    if (err.name !== 'AbortError') {
+                        copyToClipboard(shareUrl);
+                    }
+                });
             } else {
-                copyFallback(url);
+                // Fallback: copiar al portapapeles
+                copyToClipboard(shareUrl);
             }
+        }
+        
+        // COPIAR AL PORTAPAPELES
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => showNotification('Enlace copiado al portapapeles', 2000))
+                .catch(err => {
+                    // Fallback para navegadores antiguos
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showNotification('Enlace copiado', 2000);
+                });
+        }
+        
+        // ZOOM EN EL MAPA (simulado)
+        function zoomMap() {
+            showNotification('Usa dos dedos para acercar o alejar el mapa', 3000);
             
-            // Vibración en móviles
+            // Feedback táctil
             if (isMobile && navigator.vibrate) {
-                navigator.vibrate(100);
+                navigator.vibrate([50, 50, 50]);
             }
         }
         
-        // Fallback para copiar
-        function copyFallback(text) {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.opacity = '0';
-            document.body.appendChild(textArea);
-            textArea.select();
-            
-            try {
-                document.execCommand('copy');
-                showNotification('📋 Enlace copiado', 2000);
-            } catch (err) {
-                showNotification('❌ No se pudo copiar', 2000);
-            }
-            
-            document.body.removeChild(textArea);
-        }
-        
-        // Mostrar notificación
-        function showNotification(message, duration = 2000) {
+        // MOSTRAR NOTIFICACIÓN
+        function showNotification(message, duration = 3000) {
             const notification = document.getElementById('notification');
+            if (!notification) return;
+            
             notification.textContent = message;
             notification.classList.add('show');
             
@@ -1042,102 +893,47 @@
             }, duration);
         }
         
-        // Mensaje de bienvenida
-        function showWelcomeMessage() {
-            setTimeout(() => {
-                if (isMobile) {
-                    showNotification('📱 Optimizado para móvil', 3000);
-                } else {
-                    showNotification('🌟 Bienvenido al Mapa POSADA', 3000);
-                }
-            }, 800);
-        }
-        
-        // Ajustar altura del mapa para móviles
-        function adjustMapHeight() {
-            const mapWrapper = document.querySelector('.map-wrapper');
-            if (!mapWrapper) return;
+        // AJUSTES ESPECÍFICOS PARA IPHONE 13
+        function adjustForiPhone13() {
+            const isiPhone13 = window.innerWidth === 390 && window.innerHeight === 844;
             
-            if (isMobile && window.innerHeight < 700) {
-                // En móviles con pantalla pequeña, reducir altura del mapa
-                mapWrapper.style.minHeight = '250px';
-            } else if (window.innerWidth >= 768) {
-                // En desktop/tablet, altura normal
-                mapWrapper.style.minHeight = '400px';
-            } else {
-                // En móviles grandes
-                mapWrapper.style.minHeight = '300px';
+            if (isiPhone13) {
+                // Optimizar para iPhone 13
+                document.querySelector('.map-container').style.minHeight = '82vh';
+                document.querySelectorAll('.action-btn').forEach(btn => {
+                    btn.style.minHeight = '95px';
+                    btn.style.fontSize = '1.2rem';
+                });
             }
         }
         
-        // Scroll a la paleta de colores (para móviles)
-        function scrollToColors() {
-            const palette = document.getElementById('color-palette');
-            if (palette) {
-                palette.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                showNotification('🎨 Paleta de colores', 1500);
-            }
-        }
-        
-        // Iniciar actualizaciones automáticas
+        // INICIAR ACTUALIZACIONES AUTOMÁTICAS
         function startAutoUpdates() {
-            // Actualizar contador de usuarios cada 30 segundos (simulado)
-            setInterval(() => {
-                const change = Math.random() > 0.7 ? 1 : (Math.random() > 0.3 ? 0 : -1);
-                userCount = Math.max(1, userCount + change);
-                document.getElementById('user-count').textContent = userCount;
-            }, 30000);
-            
-            // Actualizar mapa cada 2 minutos
-            setInterval(refreshMap, 120000);
+            // Actualizar mapa cada 3 minutos
+            setInterval(refreshMap, 180000);
             
             // Guardar estado periódicamente
             setInterval(() => {
                 if (currentColor) {
-                    localStorage.setItem('mapa_user_color', JSON.stringify(currentColor));
+                    localStorage.setItem('posadaUserColor', JSON.stringify(currentColor));
                 }
-            }, 60000);
+            }, 300000); // Cada 5 minutos
         }
         
-        // Aclarar color (para gradiente)
-        function lightenColor(color, percent) {
-            const num = parseInt(color.replace("#", ""), 16);
-            const amt = Math.round(2.55 * percent);
-            const R = (num >> 16) + amt;
-            const G = (num >> 8 & 0x00FF) + amt;
-            const B = (num & 0x0000FF) + amt;
-            
-            return "#" + (
-                0x1000000 +
-                (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
-                (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
-                (B < 255 ? (B < 1 ? 0 : B) : 255)
-            ).toString(16).slice(1);
-        }
-        
-        // Detectar cambios de orientación
-        let previousOrientation = window.orientation;
+        // DETECTAR CAMBIOS DE ORIENTACIÓN
         window.addEventListener('orientationchange', function() {
-            if (window.orientation !== previousOrientation) {
-                previousOrientation = window.orientation;
-                // Forzar reflow para solucionar bugs de iOS
-                setTimeout(() => {
-                    window.dispatchEvent(new Event('resize'));
-                }, 300);
-            }
+            setTimeout(() => {
+                adjustForiPhone13();
+                showNotification('Orientación ajustada', 1500);
+            }, 300);
         });
         
-        // Prevenir acciones por defecto en enlaces
-        document.addEventListener('touchstart', function(e) {
-            if (e.target.tagName === 'A') {
-                e.preventDefault();
-            }
-        }, { passive: false });
-        
-        // Log para depuración
-        console.log('📱 Dispositivo:', isMobile ? 'Móvil' : 'Desktop/Tablet');
-        console.log('🖥️  Resolución:', window.innerWidth, 'x', window.innerHeight);
+        // LOG INICIAL
+        console.log('🗺️  Mapa POSADA - Versión Accesible');
+        console.log('👤 Usuario:', userId.substring(0, 10) + '...');
         console.log('🎨 Color asignado:', currentColor?.name);
+        console.log('📱 Dispositivo:', isMobile ? 'Móvil' : 'Desktop');
+        console.log('📐 Resolución:', window.innerWidth, '×', window.innerHeight);
     </script>
 </body>
 </html>
