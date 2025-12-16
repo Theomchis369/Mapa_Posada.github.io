@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Interactivo POSADA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #E6F3FF 0%, #F0E6FF 100%);
+            transition: background 1.5s ease;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: rgba(255, 255, 255, 0.97);
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4a6fa5 0%, #2c3e50 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            min-height: 600px;
+        }
+        
+        .map-section {
+            flex: 2;
+            min-width: 300px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .map-wrapper {
+            flex: 1;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            min-height: 500px;
+        }
+        
+        .map-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #f0f0f0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .color-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background-color: #f8f9fa;
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .current-color {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .color-sample {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4a6fa5 0%, #3a5a8c 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(74, 111, 165, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(74, 111, 165, 0.4);
+        }
+        
+        .btn-small {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+        }
+        
+        .user-count {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            color: #4a6fa5;
+            font-weight: 600;
+        }
+        
+        .sidebar {
+            flex: 1;
+            min-width: 300px;
+            background-color: #f8f9fa;
+            padding: 30px;
+            border-left: 1px solid #e9ecef;
+        }
+        
+        .share-box {
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .share-box h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .share-url {
+            font-family: 'Courier New', monospace;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            word-break: break-all;
+            margin: 20px 0;
+            border: 2px dashed #adb5bd;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .share-url:hover {
+            background-color: #e9ecef;
+            border-color: #4a6fa5;
+        }
+        
+        .copy-btn {
+            width: 100%;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .colors-title {
+            color: #2c3e50;
+            margin: 30px 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .color-option {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.15);
+        }
+        
+        .color-option.selected {
+            border-color: #4a6fa5;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.3), 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 25px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+        
+        .footer p {
+            margin-bottom: 8px;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 18px 30px;
+            background: linear-gradient(135deg, #4a6fa5 0%, #3a5a8c 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            max-width: 350px;
+            font-weight: 500;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                border-left: none;
+                border-top: 1px solid #e9ecef;
+            }
+            
+            .color-palette {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .header {
+                padding: 25px 20px;
+            }
+            
+            .map-section, .sidebar {
+                padding: 20px;
+            }
+            
+            .map-wrapper {
+                min-height: 400px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .color-info {
+                justify-content: center;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .color-palette {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.7rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .map-wrapper {
+                min-height: 350px;
+            }
+            
+            .color-palette {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .notification {
+                bottom: 20px;
+                right: 20px;
+                left: 20px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                <i class="fas fa-map-marked-alt"></i>
+                Mapa Interactivo POSADA
+            </h1>
+            <p>Comparte este enlace con amigos y familiares. Cada persona verá un color de fondo único y personalizado.</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="map-section">
+                <div class="map-wrapper">
+                    <iframe 
+                        src="https://www.google.com/maps/d/u/0/embed?mid=1bcJ_sOb0WPlQEJCom5hkQFPqkfS8mO8&ehbc=2E312F" 
+                        class="map-frame"
+                        title="Mapa de POSADA"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                
+                <div class="controls">
+                    <div class="color-info">
+                        <div class="current-color">
+                            <i class="fas fa-palette"></i>
+                            <span id="color-name">Tu color personal</span>
+                            <div id="color-sample" class="color-sample"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn" id="change-color-btn">
+                            <i class="fas fa-random"></i> Cambiar Color
+                        </button>
+                        <button class="btn btn-small" id="refresh-btn">
+                            <i class="fas fa-sync-alt"></i> Actualizar Mapa
+                        </button>
+                    </div>
+                    
+                    <div class="user-count">
+                        <i class="fas fa-users"></i>
+                        <span id="user-count">1</span> persona en línea
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="share-box">
+                    <h3><i class="fas fa-share-alt"></i> Compartir Enlace</h3>
+                    <p>Envía este enlace a quienes quieras. Cada uno verá un color diferente:</p>
+                    
+                    <div class="share-url" id="share-url">
+                        Cargando...
+                    </div>
+                    
+                    <button class="btn copy-btn" id="copy-btn">
+                        <i class="far fa-copy"></i> Copiar Enlace
+                    </button>
+                </div>
+                
+                <h3 class="colors-title"><i class="fas fa-paint-brush"></i> Paleta de Colores</h3>
+                <p>Colores suaves especialmente seleccionados para personas mayores (70-90 años):</p>
+                
+                <div class="color-palette" id="color-palette">
+                    <!-- Los colores se generarán automáticamente -->
+                </div>
+                
+                <div style="margin-top: 30px; padding: 20px; background-color: #e8f4ff; border-radius: 12px; border-left: 4px solid #4a6fa5;">
+                    <h4><i class="fas fa-lightbulb"></i> ¿Cómo funciona?</h4>
+                    <p style="margin-top: 10px; font-size: 0.95rem; color: #495057;">
+                        1. Cada visitante obtiene un color único basado en su dispositivo<br>
+                        2. Los colores son suaves y de buen contraste<br>
+                        3. El mapa se actualiza automáticamente cada 2 minutos<br>
+                        4. Puedes cambiar tu color cuando quieras
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><i class="fas fa-info-circle"></i> Este mapa se actualiza automáticamente. Diseñado pensando en la accesibilidad para todas las edades.</p>
+            <p>Los colores han sido seleccionados específicamente para personas de 70 a 90 años.</p>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <script>
+        // Paleta de colores para personas mayores (70-90 años)
+        const elderFriendlyColors = [
+            // Azules suaves
+            { name: "Azul Claro", value: "#E6F3FF", group: "azul" },
+            { name: "Azul Pastel", value: "#D6E8FF", group: "azul" },
+            { name: "Azul Cielo", value: "#B8D4FF", group: "azul" },
+            
+            // Verdes suaves
+            { name: "Verde Menta", value: "#E0F2E9", group: "verde" },
+            { name: "Verde Pastel", value: "#D4EDE0", group: "verde" },
+            { name: "Verde Claro", value: "#B8E6D0", group: "verde" },
+            
+            // Beiges y marfil
+            { name: "Beige Claro", value: "#F5F1E8", group: "beige" },
+            { name: "Marfil", value: "#F8F4E6", group: "beige" },
+            { name: "Crema", value: "#FFFBF0", group: "beige" },
+            
+            // Lavandas suaves
+            { name: "Lavanda Claro", value: "#F0E6FF", group: "lavanda" },
+            { name: "Lila Pastel", value: "#E8E0F2", group: "lavanda" },
+            { name: "Malva Claro", value: "#E6D4FF", group: "lavanda" },
+            
+            // Grises cálidos
+            { name: "Gris Perla", value: "#F2F2F2", group: "gris" },
+            { name: "Gris Claro", value: "#E8E8E8", group: "gris" },
+            { name: "Gris Suave", value: "#F0F0F0", group: "gris" }
+        ];
+        
+        // Estado de la aplicación
+        let currentColor = null;
+        let userId = null;
+        let userCount = 1;
+        
+        // Inicializar cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+            setupEventListeners();
+            generateColorPalette();
+            showWelcomeMessage();
+        });
+        
+        // Inicializar aplicación
+        function initApp() {
+            // Generar o recuperar ID de usuario
+            userId = getOrCreateUserId();
+            
+            // Seleccionar color para este usuario
+            selectUserColor();
+            
+            // Actualizar interfaz
+            updateInterface();
+            
+            // Iniciar actualizaciones automáticas
+            startAutoUpdates();
+        }
+        
+        // Obtener o crear ID de usuario
+        function getOrCreateUserId() {
+            let id = localStorage.getItem('mapa_user_id');
+            if (!id) {
+                id = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('mapa_user_id', id);
+            }
+            return id;
+        }
+        
+        // Seleccionar color para el usuario
+        function selectUserColor() {
+            // Intentar recuperar color guardado
+            const savedColor = localStorage.getItem('mapa_user_color');
+            if (savedColor) {
+                try {
+                    const color = JSON.parse(savedColor);
+                    const exists = elderFriendlyColors.find(c => c.value === color.value);
+                    if (exists) {
+                        currentColor = exists;
+                        return;
+                    }
+                } catch (e) {
+                    // Si hay error, continuar con selección nueva
+                }
+            }
+            
+            // Seleccionar color basado en ID de usuario
+            let hash = 0;
+            for (let i = 0; i < userId.length; i++) {
+                hash = ((hash << 5) - hash) + userId.charCodeAt(i);
+                hash = hash & hash;
+            }
+            
+            const colorIndex = Math.abs(hash) % elderFriendlyColors.length;
+            currentColor = elderFriendlyColors[colorIndex];
+            
+            // Guardar color seleccionado
+            localStorage.setItem('mapa_user_color', JSON.stringify(currentColor));
+        }
+        
+        // Actualizar interfaz
+        function updateInterface() {
+            if (!currentColor) return;
+            
+            // Actualizar color de fondo
+            document.body.style.background = `linear-gradient(135deg, ${currentColor.value} 0%, ${lightenColor(currentColor.value, 20)} 100%)`;
+            
+            // Actualizar nombre del color
+            document.getElementById('color-name').textContent = currentColor.name;
+            
+            // Actualizar muestra de color
+            document.getElementById('color-sample').style.backgroundColor = currentColor.value;
+            
+            // Actualizar URL para compartir
+            const url = window.location.href.split('?')[0];
+            document.getElementById('share-url').textContent = url;
+            
+            // Actualizar selección en paleta
+            updateColorPaletteSelection();
+        }
+        
+        // Generar paleta de colores visual
+        function generateColorPalette() {
+            const palette = document.getElementById('color-palette');
+            palette.innerHTML = '';
+            
+            elderFriendlyColors.forEach((color, index) => {
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'color-option';
+                colorDiv.style.backgroundColor = color.value;
+                colorDiv.title = color.name;
+                colorDiv.dataset.index = index;
+                
+                colorDiv.addEventListener('click', () => {
+                    selectColorByIndex(index);
+                });
+                
+                palette.appendChild(colorDiv);
+            });
+        }
+        
+        // Actualizar selección en paleta
+        function updateColorPaletteSelection() {
+            if (!currentColor) return;
+            
+            const colorIndex = elderFriendlyColors.findIndex(c => c.value === currentColor.value);
+            const colorOptions = document.querySelectorAll('.color-option');
+            
+            colorOptions.forEach(option => {
+                option.classList.remove('selected');
+                if (parseInt(option.dataset.index) === colorIndex) {
+                    option.classList.add('selected');
+                }
+            });
+        }
+        
+        // Seleccionar color por índice
+        function selectColorByIndex(index) {
+            if (index < 0 || index >= elderFriendlyColors.length) return;
+            
+            currentColor = elderFriendlyColors[index];
+            localStorage.setItem('mapa_user_color', JSON.stringify(currentColor));
+            updateInterface();
+            
+            showNotification(`Color cambiado a: ${currentColor.name}`, 3000);
+        }
+        
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Botón cambiar color
+            document.getElementById('change-color-btn').addEventListener('click', () => {
+                const currentIndex = elderFriendlyColors.findIndex(c => c.value === currentColor.value);
+                let newIndex;
+                
+                do {
+                    newIndex = Math.floor(Math.random() * elderFriendlyColors.length);
+                } while (newIndex === currentIndex && elderFriendlyColors.length > 1);
+                
+                selectColorByIndex(newIndex);
+            });
+            
+            // Botón actualizar mapa
+            document.getElementById('refresh-btn').addEventListener('click', refreshMap);
+            
+            // Botón copiar enlace
+            document.getElementById('copy-btn').addEventListener('click', copyLinkToClipboard);
+            
+            // Hacer clic en el enlace para copiar
+            document.getElementById('share-url').addEventListener('click', copyLinkToClipboard);
+        }
+        
+        // Actualizar mapa
+        function refreshMap() {
+            const mapFrame = document.querySelector('.map-frame');
+            if (mapFrame) {
+                const currentSrc = mapFrame.src;
+                mapFrame.src = currentSrc.split('&t=')[0] + '&t=' + new Date().getTime();
+                showNotification('✅ Mapa actualizado', 2000);
+            }
+        }
+        
+        // Copiar enlace al portapapeles
+        function copyLinkToClipboard() {
+            const url = window.location.href.split('?')[0];
+            
+            navigator.clipboard.writeText(url)
+                .then(() => {
+                    showNotification('📋 Enlace copiado al portapapeles', 3000);
+                })
+                .catch(err => {
+                    console.error('Error copiando enlace:', err);
+                    // Fallback para navegadores antiguos
+                    const textArea = document.createElement('textarea');
+                    textArea.value = url;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showNotification('📋 Enlace copiado', 3000);
+                });
+        }
+        
+        // Mostrar notificación
+        function showNotification(message, duration = 3000) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, duration);
+        }
+        
+        // Mensaje de bienvenida
+        function showWelcomeMessage() {
+            setTimeout(() => {
+                showNotification('🌟 Bienvenido al Mapa Interactivo POSADA', 4000);
+            }, 1000);
+        }
+        
+        // Iniciar actualizaciones automáticas
+        function startAutoUpdates() {
+            // Actualizar contador de usuarios cada 30 segundos (simulado)
+            setInterval(() => {
+                const change = Math.random() > 0.7 ? 1 : (Math.random() > 0.3 ? 0 : -1);
+                userCount = Math.max(1, userCount + change);
+                document.getElementById('user-count').textContent = userCount;
+            }, 30000);
+            
+            // Actualizar mapa cada 2 minutos
+            setInterval(refreshMap, 120000);
+        }
+        
+        // Aclarar color (para gradiente)
+        function lightenColor(color, percent) {
+            const num = parseInt(color.replace("#", ""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            
+            return "#" + (
+                0x1000000 +
+                (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+                (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+                (B < 255 ? (B < 1 ? 0 : B) : 255)
+            ).toString(16).slice(1);
+        }
+        
+        // Mostrar información en consola para depuración
+        console.log('🗺️ Mapa POSADA - Listo');
+        console.log('👤 Tu ID:', userId);
+        console.log('🎨 Tu color:', currentColor?.name);
+        console.log('🔗 Comparte:', window.location.href.split('?')[0]);
+    </script>
+</body>
+</html>
