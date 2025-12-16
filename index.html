@@ -368,7 +368,7 @@
                 <i class="fas fa-map-marked-alt"></i>
                 Mapa Interactivo POSADA
             </h1>
-            <p>Comparte este enlace con amigos y familiares. Cada persona verá un color de fondo único y personalizado.</p>
+            <p>Comparte este enlace con amigos y familiares.</p>
         </div>
         
         <div class="main-content">
@@ -402,7 +402,7 @@
                     
                     <div class="user-count">
                         <i class="fas fa-users"></i>
-                        <span id="user-count">1</span> persona en línea
+                        <span id="user-count">1</span> personas en línea
                     </div>
                 </div>
             </div>
@@ -410,7 +410,7 @@
             <div class="sidebar">
                 <div class="share-box">
                     <h3><i class="fas fa-share-alt"></i> Compartir Enlace</h3>
-                    <p>Envía este enlace a quienes quieras. Cada uno verá un color diferente:</p>
+                    <p>Envía este enlace a quienes quieras:</p>
                     
                     <div class="share-url" id="share-url">
                         Cargando...
@@ -422,7 +422,6 @@
                 </div>
                 
                 <h3 class="colors-title"><i class="fas fa-paint-brush"></i> Paleta de Colores</h3>
-                <p>Colores suaves especialmente seleccionados para personas mayores (70-90 años):</p>
                 
                 <div class="color-palette" id="color-palette">
                     <!-- Los colores se generarán automáticamente -->
@@ -431,25 +430,23 @@
                 <div style="margin-top: 30px; padding: 20px; background-color: #e8f4ff; border-radius: 12px; border-left: 4px solid #4a6fa5;">
                     <h4><i class="fas fa-lightbulb"></i> ¿Cómo funciona?</h4>
                     <p style="margin-top: 10px; font-size: 0.95rem; color: #495057;">
-                        1. Cada visitante obtiene un color único basado en su dispositivo<br>
-                        2. Los colores son suaves y de buen contraste<br>
+                        1. Utiliza el mapa para interactuar<br>
+                        2. Selecciona en la barra de la izquierda las ubicaciones<br>
                         3. El mapa se actualiza automáticamente cada 2 minutos<br>
-                        4. Puedes cambiar tu color cuando quieras
+                        4. Puedes pedir las direcciones a cualquier punto marcado en el mapa<br>
                     </p>
                 </div>
             </div>
         </div>
         
         <div class="footer">
-            <p><i class="fas fa-info-circle"></i> Este mapa se actualiza automáticamente. Diseñado pensando en la accesibilidad para todas las edades.</p>
-            <p>Los colores han sido seleccionados específicamente para personas de 70 a 90 años.</p>
+            <p><i class="fas fa-info-circle"></i> Este mapa se actualiza automáticamente.</p>
         </div>
     </div>
     
     <div class="notification" id="notification"></div>
     
     <script>
-        // Paleta de colores para personas mayores (70-90 años)
         const elderFriendlyColors = [
             // Azules suaves
             { name: "Azul Claro", value: "#E6F3FF", group: "azul" },
@@ -722,4 +719,5 @@
         console.log('🔗 Comparte:', window.location.href.split('?')[0]);
     </script>
 </body>
+
 </html>
